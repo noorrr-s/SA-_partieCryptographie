@@ -55,8 +55,8 @@ function inversemod( $e, $f)
     return $resultat;
 }
 
-// Tests
-echo inversemod(5, 26) . "\n"; // Affiche 21
+// Test
+echo inversemod(5, 26) . "\n";
 
 try {
     echo inversemod(2, 26) . "\n";
