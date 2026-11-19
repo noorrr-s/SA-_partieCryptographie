@@ -1,6 +1,39 @@
 <?php
 
 
+// 1.1 Exponentiation rapide (Personne 1)
+function expmod(int $x, int $e, int $n): int
+{
+    if ($n <= 0) {
+        throw new InvalidArgumentException("Le module n doit être strictement positif.");
+    }
+    if ($e < 0) {
+        throw new InvalidArgumentException("L'exposant e doit être positif ou nul.");
+    }
+
+    $result = 1 % $n;
+    $base = $x % $n;
+    if ($base < 0) {
+        $base += $n;
+    }
+    $exp = $e;
+
+    while ($exp > 0) {
+        if (($exp & 1) === 1) {
+            $result = ($result * $base) % $n;
+        }
+        $base = ($base * $base) % $n;
+        $exp >>= 1;
+    }
+
+    return $result;
+}
+
+// Test
+echo expmod(2, 30, 9) . "\n"; // Affiche 1
+
+
+
 // 1.2 PGCD (algorithme d'Euclide)
 function gcd(int $a, int $b) : int
 {
@@ -63,3 +96,22 @@ try {
 } catch (Exception $err) {
     echo $err->getMessage() . "\n"; // Affiche une erreur car PGCD(2, 26) = 2 et non pas 1
 }
+
+
+
+// 1.4 Chiffrement et déchiffrement RSA (Personne 1)
+
+function RSAencrypt(int $x, int $e, int $n): int
+{
+    return expmod($x, $e, $n);
+}
+
+function RSAdecrypt(int $y, int $d, int $p, int $q): int
+{
+    $n = $p * $q;
+    return expmod($y, $d, $n);
+}
+
+// Tests
+echo RSAencrypt(3, 5, 85) . "\n"; // Affiche 73
+echo RSAdecrypt(2, 5, 5, 17) . "\n"; // Affiche 32
