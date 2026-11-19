@@ -115,3 +115,134 @@ function RSAdecrypt(int $y, int $d, int $p, int $q): int
 // Tests
 echo RSAencrypt(3, 5, 85) . "\n"; // Affiche 73
 echo RSAdecrypt(2, 5, 5, 17) . "\n"; // Affiche 32
+
+
+
+// 1.5 b - Test de Miller-Rabin
+
+function millerRabin($n, $k) {
+
+    // Cas particuliers
+    if ($n < 2) {
+        return false;
+    }
+
+    if ($n == 2 || $n == 3) {
+        return true;
+    }
+
+    if ($n % 2 == 0) {
+        return false;
+    }
+
+    // On decompose n-1 sous la forme 2^s * d
+    $d = $n - 1;
+    $s = 0;
+
+    while ($d % 2 == 0) {
+        $d = intdiv($d, 2);
+        $s++;
+    }
+
+    // On teste plusieurs bases au hasard
+    for ($i = 0; $i < $k; $i++) {
+
+        $a = random_int(2, $n - 2);
+
+        // Si on trouve un temoin, le nombre est compose
+        if (estTemoin($a, $d, $s, $n)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+
+// 1.5 c - Tests de Miller-Rabin
+
+echo "Tests de Miller-Rabin :<br>";
+
+echo "561 : ";
+echo millerRabin(561, 20) ? "premier<br>" : "compose<br>";
+
+echo "221 : ";
+echo millerRabin(221, 20) ? "premier<br>" : "compose<br>";
+
+echo "997 : ";
+echo millerRabin(997, 20) ? "premier<br>" : "compose<br>";
+
+echo "7919 : ";
+echo millerRabin(7919, 20) ? "premier<br>" : "compose<br>";
+
+
+
+// 1.5 d - Recherche d'un nombre premier aleatoire
+
+function premierAleatoire($min, $max) {
+
+    // On commence et on termine par un nombre impair
+    $minImpair = ($min % 2 == 0) ? $min + 1 : $min;
+    $maxImpair = ($max % 2 == 0) ? $max - 1 : $max;
+
+    if ($minImpair > $maxImpair || $maxImpair < 3) {
+        throw new Exception("Intervalle invalide");
+    }
+
+    // On tire des nombres impairs jusqu'a trouver un premier
+    do {
+        $n = $minImpair + 2 * random_int(
+            0,
+            intdiv($maxImpair - $minImpair, 2)
+        );
+
+    } while (!millerRabin($n, 20));
+
+    return $n;
+}
+
+
+// Generation des cles RSA
+
+function genererClesRSA($min, $max) {
+
+    $p = premierAleatoire($min, $max);
+
+    do {
+        $q = premierAleatoire($min, $max);
+    } while ($p == $q);
+
+    $n = $p * $q;
+    $phi = ($p - 1) * ($q - 1);
+
+    do {
+        $e = random_int(2, $phi - 1);
+    } while (gcd($e, $phi) != 1);
+
+    $d = inversemod($e, $phi);
+
+    return [
+        "p" => $p,
+        "q" => $q,
+        "n" => $n,
+        "phi" => $phi,
+        "e" => $e,
+        "d" => $d
+    ];
+}
+
+
+// Test de generation des cles RSA
+
+echo "<br>Generation des cles RSA :<br>";
+
+$cles = genererClesRSA(100, 999);
+
+echo "p = " . $cles["p"] . "<br>";
+echo "q = " . $cles["q"] . "<br>";
+echo "n = " . $cles["n"] . "<br>";
+echo "phi(n) = " . $cles["phi"] . "<br>";
+echo "e = " . $cles["e"] . "<br>";
+echo "d = " . $cles["d"] . "<br>";
+?>
