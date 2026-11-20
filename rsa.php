@@ -52,7 +52,19 @@ function gcd(int $a, int $b) : int
 // Test
 echo gcd(12, 26) . "\n";
 
+// Comptage des témoins de Fermat
 
+function nombreTemoinsFermat(int $n): int {
+    $compteur = 0;
+
+    for ($a = 2; $a < $n; $a++) {
+        if (gcd($a, $n) == 1 && expmod($a, $n - 1, $n) != 1) {
+            $compteur++;
+        }
+    }
+
+    return $compteur;
+}
 
 // 1.3 Inverse modulaire (algorithme d'Euclide étendu)
 
@@ -116,7 +128,37 @@ function RSAdecrypt(int $y, int $d, int $p, int $q): int
 echo RSAencrypt(3, 5, 85) . "\n"; // Affiche 73
 echo RSAdecrypt(2, 5, 5, 17) . "\n"; // Affiche 32
 
+// 1.5 a - Décomposition de n-1
+function factoriserPair(int $n): array {
+    $d = $n - 1;
+    $s = 0;
 
+    while ($d % 2 == 0) {
+        $d = intdiv($d, 2);
+        $s++;
+    }
+
+    return [$s, $d];
+}
+
+// 1.5 a - Test d'un temoin de Miller-Rabin
+function estTemoin(int $a, int $d, int $s, int $n): bool {
+    $x = expmod($a, $d, $n);
+
+    if ($x == 1 || $x == $n - 1) {
+        return false;
+    }
+
+    for ($r = 1; $r < $s; $r++) {
+        $x = ($x * $x) % $n;
+
+        if ($x == $n - 1) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 // 1.5 b - Test de Miller-Rabin
 
@@ -136,13 +178,7 @@ function millerRabin($n, $k) {
     }
 
     // On decompose n-1 sous la forme 2^s * d
-    $d = $n - 1;
-    $s = 0;
-
-    while ($d % 2 == 0) {
-        $d = intdiv($d, 2);
-        $s++;
-    }
+    [$s, $d] = factoriserPair($n);
 
     // On teste plusieurs bases au hasard
     for ($i = 0; $i < $k; $i++) {
@@ -245,4 +281,14 @@ echo "n = " . $cles["n"] . "<br>";
 echo "phi(n) = " . $cles["phi"] . "<br>";
 echo "e = " . $cles["e"] . "<br>";
 echo "d = " . $cles["d"] . "<br>";
+
+// Tests de décomposition et des témoins de Fermat
+
+echo "<br>Tests de factoriserPair :<br>";
+print_r(factoriserPair(561));
+
+echo "<br>Tests du nombre de témoins de Fermat :<br>";
+echo "561 : " . nombreTemoinsFermat(561) . "<br>";
+echo "15 : " . nombreTemoinsFermat(15) . "<br>";
+
 ?>
